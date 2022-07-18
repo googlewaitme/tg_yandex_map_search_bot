@@ -13,12 +13,25 @@ class Searcher:
         count_of_results - количество возвращаемых мест
         skip - страница пагинации
         '''
+        self.PAGINATION_LENGTH = 10
+
         self.lang = lang
         self.url = url
         self.token = token
         self.results = count_of_results
 
         self.spliter = spliter
+
+    def search_by_text_in_file(self, text: str, filename: str):
+        data = self.get_json_data_by_text(text, skip=0)
+        count_of_founded = data['properties']['ResponseMetaData']['SearchResponse']['found']
+
+        file = open(filename, 'w')
+        for skip in range(count_of_founded // self.PAGINATION_LENGTH + 1):
+            data = self.get_json_data_by_text(text, skip=skip)
+            for el in data['features']:
+                self.write_in_file(file, el)
+        file.close()
 
     def search_by_text(self, text: str, skip: int = 0):
         result = ''
@@ -28,7 +41,6 @@ class Searcher:
         for el in data['features']:
             result += self.make_text_from_element(el)
             result += self.spliter
-
         return result
 
     def get_json_data_by_text(self, text: str, skip: int = 0):
@@ -41,6 +53,22 @@ class Searcher:
         }
         result =  requests.get(self.url, params=payload)
         return result.json()
+
+    def write_in_file(self, file, el: dict):
+        company_meta = el['properties']['CompanyMetaData']
+        result = company_meta['name'] + '\t'
+        result += company_meta['address'] + '\t'
+
+        if 'Phones' in company_meta:
+            phone_text = ' '.join([phone['formatted'] for phone in company_meta['Phones']])
+        else:
+            phone_text = 'Телефон отсутсвует'
+        result += phone_text + '\t'
+
+        site_url = company_meta['url'] if 'url' in company_meta else 'сайта нет'
+        result += site_url + '\t'
+
+        file.write(result + '\n') 
 
     def make_text_from_element(self, el):
         company_meta = el['properties']['CompanyMetaData']
@@ -59,5 +87,3 @@ class Searcher:
         result += '<b>Сайт:</b> ' + site_url + '\n'
 
         return result
-
-

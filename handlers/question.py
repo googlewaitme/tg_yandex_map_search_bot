@@ -4,7 +4,7 @@
 from loader import dp, searcher
 
 from aiogram import types
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 
 
 
@@ -12,7 +12,12 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 async def send_answer(message: types.Message):
     request = message.text
 
-    title = f"Результаты по запросу '{request}'\n\n"
+    searcher.search_by_text_in_file(request, 'output.csv')
+
+    await message.reply_document(InputFile('output.csv'), 'output.csv') 
+
+
+"""
     result = searcher.search_by_text(request, skip=0)
 
     inline_button = InlineKeyboardButton('Следующая выдача', callback_data='1:' + request)
@@ -20,6 +25,7 @@ async def send_answer(message: types.Message):
 
     await message.answer(title + result, reply_markup=markup)
 
+"""
 
 @dp.callback_query_handler()
 async def send_answer_from_callback(query: types.CallbackQuery):
