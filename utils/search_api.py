@@ -66,6 +66,7 @@ class Searcher:
             phone_text = ' '.join([phone['formatted'] for phone in company_meta['Phones']])
         else:
             phone_text = 'Телефон отсутсвует'
+        phone_text = phone_text.replace('+', '')
         result += phone_text + '\t'
 
         site_url = company_meta['url'] if 'url' in company_meta else 'сайта нет'
