@@ -57,7 +57,10 @@ class Searcher:
     def write_in_file(self, file, el: dict):
         company_meta = el['properties']['CompanyMetaData']
         result = company_meta['name'] + '\t'
-        result += company_meta['address'] + '\t'
+        address = company_meta['address'].split(',')
+        country = address[0].strip()
+        city = address[1].strip()
+        result += country + '\t' + city + '\t'
 
         if 'Phones' in company_meta:
             phone_text = ' '.join([phone['formatted'] for phone in company_meta['Phones']])
@@ -66,7 +69,7 @@ class Searcher:
         result += phone_text + '\t'
 
         site_url = company_meta['url'] if 'url' in company_meta else 'сайта нет'
-        result += site_url + '\t'
+        # result += site_url + '\t'
 
         file.write(result + '\n') 
 
